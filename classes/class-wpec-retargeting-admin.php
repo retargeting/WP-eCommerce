@@ -56,17 +56,17 @@ class WPEC_Retargeting_Admin
         );
 
         add_settings_field(
-            'retargeting_discounts_api',
-            __('Discounts API Key'),
+            'retargeting_token',
+            __('Token'),
             array('WPSC_Settings_Tab_Retargeting', 'display_setting'),
             'retargeting',
             'retargeting_general_settings',
             array(
                 'type' => 'text',
-                'desc' => __('Insert retargeting Discounts API Key. <a href="https://retargeting.biz/admin/module/settings/docs-and-api" target="_blank">Click here</a> to get your Discounts API Key'),
+                'desc' => __('Insert retargeting Token. <a href="https://retargeting.biz/admin/module/settings/docs-and-api" target="_blank">Click here</a> to get your Token'),
                 'html_options' => array(
-                    'name' => 'wpsc_options[retargeting_discounts_api]',
-                    'value' => get_option('retargeting_discounts_api', ''),
+                    'name' => 'wpsc_options[retargeting_token]',
+                    'value' => get_option('retargeting_token', ''),
                     'size' => 40
                 )
             )
@@ -98,8 +98,8 @@ class WPEC_Retargeting_Admin
 
         register_setting(
             'retargeting',
-            'retargeting_discounts_api',
-            array($this, 'validate_setting_discounts_api')
+            'retargeting_token',
+            array($this, 'validate_setting_token')
         );
 
         register_setting(
@@ -116,10 +116,10 @@ class WPEC_Retargeting_Admin
         return $account_id;
     }
 
-    public function validate_setting_discounts_api($discounts_api)
+    public function validate_setting_token($token)
     {
-        $valid = get_option('retargeting_discounts_api');
-        return $discounts_api;
+        $valid = get_option('retargeting_token');
+        return $token;
     }
 
     public function validate_setting_help_pages($pages)

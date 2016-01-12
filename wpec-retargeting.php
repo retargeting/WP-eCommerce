@@ -85,15 +85,7 @@ if (!class_exists('WPEC_Retargeting')) :
                 add_option('retargeting_tagging_account_id', '');
                 add_option('retargeting_tagging_use_default_elements', 1);
 
-                $this->load_class('WPEC_Retargeting_Top_Sellers_Page');
-                $page_id = get_option('retargeting_tagging_top_sellers_page_id', null);
-                $page = new WPEC_Retargeting_Top_Sellers_Page($page_id);
-                $page->publish();
-                if (null === $page_id) {
-                    add_option('retargeting_tagging_top_sellers_page_id', $page->get_id());
-                } else {
-                    update_option('retargeting_tagging_top_sellers_page_id', $page->get_id());
-                }
+                
             }
         }
 
@@ -288,6 +280,9 @@ if (!class_exists('WPEC_Retargeting')) :
 
         public function save_order($purchase_log)
         {
+            $apiKey = get_option('retargeting_domain_api');
+            $token = get_option('retargeting_token');
+
             if ($purchase_log instanceof WPSC_Purchase_Log) {
                 $order = array(
                     'line_items' => array(),
@@ -311,12 +306,38 @@ if (!class_exists('WPEC_Retargeting')) :
                             'id' => (int)$product_id,
                             'quantity' => (int)$product->quantity,
                             'price' => $this->format_price($product->price),
+                            'variation_code' => ''
                         );
 
                         $order['line_items'][] = $line_item;
                     }
                 }
 
+                if($apiKey && $apiKey != "" && $token && $token != "") {
+
+                    require_once("/lib/Retargeting_REST_API_Client.php");
+                    
+                    $orderInfo = array(
+                        "order_no" => $purchase_log->get('id'),
+                        "lastname" => $checkout_form->get('billinglastname'),
+                        "firstname" => $checkout_form->get('billingfirstname'),
+                        "email" => $checkout_form->get('billingemail'),
+                        "phone" => $checkout_form->get('billingphone'),
+                        "state" => $checkout_form->get('shippingstate'),
+                        "city" => $checkout_form->get('shippingcity'),
+                        "address" => $checkout_form->get('billingaddress'),
+                        "discount_code" => $purchase_log->get('discount_data'),
+                        "discount" => $purchase_log->get('discount_value'),
+                        "shipping" => $purchase_log->get('total_shipping'),
+                        "total" => $purchase_log->get('totalprice')
+                    );
+
+                    $orderClient = new Retargeting_REST_API_Client($apiKey, $token);
+                    $orderClient->setResponseFormat('json');
+                    $orderClient->setDecoding(false);
+                    $response = $orderClient->order->save($orderInfo,$order['line_items']);
+                }
+                
                 echo '<script type="text/javascript">
 						var _ra = _ra || {};
 							_ra.saveOrderInfo = {
@@ -603,10 +624,10 @@ if (!class_exists('WPEC_Retargeting')) :
         {
             global $wp_query;
             global $wpdb;
-            $discounts_api_key = get_option('retargeting_discounts_api');
+            $token = get_option('retargeting_token');
             if (isset($wp_query->query['retargeting']) && $wp_query->query['retargeting'] == 'discounts') {
                 if (isset($wp_query->query['key']) && isset($wp_query->query['value']) && isset($wp_query->query['type']) && isset($wp_query->query['count'])) {
-                    if ($wp_query->query['key'] != "" && $wp_query->query['key'] == $discounts_api_key && $wp_query->query['value'] != "" && $wp_query->query['type'] != "" && $wp_query->query['count'] != "") {
+                    if ($wp_query->query['key'] != "" && $wp_query->query['key'] == $token && $wp_query->query['value'] != "" && $wp_query->query['type'] != "" && $wp_query->query['count'] != "") {
                         if (!in_array($wp_query->query['type'], array(0, 1, 2))) {
                             echo json_encode(array("status" => false, "error" => "0003: Invalid Type!"));
                             exit;

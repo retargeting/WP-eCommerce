@@ -2,10 +2,10 @@
 Contributors: retargeting
 Tags: retargeting, wpcommerce, WP eCommerce
 Requires at least: 3.5
-Tested up to: 4.2.2
-Stable tag: 1.0.0
+Tested up to: 4.4.1
+Stable tag: 1.0.1
 Requires WP eCommerce at least: 3.9
-Tested WP eCommerce up to: 3.9.4
+Tested WP eCommerce up to: 3.11.2
 License: GPLv2
 
 Adds Retargeting tracking to WP eCommerce.
